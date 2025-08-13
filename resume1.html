@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharan H. Rao - AI Innovator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #16213e 50%, #0f3460 75%, #0a0a0a 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 30% 20%, rgba(157, 0, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 255, 157, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+            animation: cosmicShift 20s ease-in-out infinite;
+        }
+        
+        @keyframes cosmicShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 20s linear infinite;
+            box-shadow: 0 0 6px #00ffff;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(-10px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(10px);
+                opacity: 0;
+            }
+        }
+        
+        .three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        header {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(0,255,255,0.1) 0%, rgba(157,0,255,0.1) 100%);
+        }
+        
+        .hero-content {
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .hero-name {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ffff, #9d00ff, #00ff9d);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(0,255,255,0.5);
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes glow {
+            0% { filter: brightness(1) drop-shadow(0 0 20px rgba(0,255,255,0.3)); }
+            100% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(0,255,255,0.6)); }
+        }
+        
+        .hero-title {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            margin-bottom: 0.5rem;
+            color: #00ff9d;
+            font-weight: 600;
+        }
+        
+        .hero-tagline {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .contact-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,255,255,0.1);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+        
+        .contact-icon:hover {
+            transform: scale(1.1) translateY(-5px);
+            background: rgba(0,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(0,255,255,0.4);
+        }
+        
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .glass-card:hover::before {
+            left: 100%;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,255,255,0.2);
+            border-color: #00ffff;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: #00ffff;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #9d00ff, #00ff9d);
+            border-radius: 2px;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .skill-item {
+            background: rgba(0,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0,255,255,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #9d00ff);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .skill-item:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .skill-item:hover {
+            background: rgba(0,255,255,0.1);
+            transform: translateY(-5px);
+        }
+        
+        .skill-name {
+            font-weight: 600;
+            color: #00ff9d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #9d00ff);
+            border-radius: 3px;
+            transition: width 1s ease-in-out;
+            width: 0;
+        }
+        
+        .project-card {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .project-info h3 {
+            color: #00ff9d;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .tech-tag {
+            padding: 0.3rem 0.8rem;
+            background: rgba(157,0,255,0.2);
+            border: 1px solid #9d00ff;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #9d00ff;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: floatShape 20s linear infinite;
+        }
+        
+        @keyframes floatShape {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 100;
+        }
+        
+        .scroll-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #00ffff;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .scroll-dot.active {
+            background: #00ffff;
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
+        .experience-item {
+            border-left: 2px solid #00ffff;
+            padding-left: 2rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background: #00ffff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .experience-role {
+            color: #00ff9d;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .experience-company {
+            color: #9d00ff;
+            font-style: italic;
+        }
+        
+        .cursor-follower {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,255,0.3), transparent);
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .project-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-icons {
+                gap: 1rem;
+            }
+            
+            .contact-icon {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .scroll-indicator {
+                display: none;
+            }
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg"></div>
+    <div class="particles" id="particles"></div>
+    <div class="three-container" id="threeContainer"></div>
+    <div class="cursor-follower" id="cursor"></div>
+    
+    <header>
+        <div class="hero-content">
+            <h1 class="hero-name">SHARAN H. RAO</h1>
+            <h2 class="hero-title">B.Tech Student – Artificial Intelligence & Machine Learning</h2>
+            <p class="hero-tagline">Innovating the Future with AI, ML, and Immersive Tech</p>
+            <div class="contact-icons">
+                <div class="contact-icon">📧</div>
+                <div class="contact-icon">📱</div>
+                <div class="contact-icon">💼</div>
+                <div class="contact-icon">🌐</div>
+            </div>
+        </div>
+        <div class="floating-shapes">
+            <div class="shape" style="left: 10%; animation-delay: 0s;">🔷</div>
+            <div class="shape" style="left: 80%; animation-delay: 5s;">⭐</div>
+            <div class="shape" style="left: 50%; animation-delay: 10s;">🔸</div>
+        </div>
+    </header>
+
+    <div class="scroll-indicator">
+        <div class="scroll-dot active" data-section="0"></div>
+        <div class="scroll-dot" data-section="1"></div>
+        <div class="scroll-dot" data-section="2"></div>
+        <div class="scroll-dot" data-section="3"></div>
+        <div class="scroll-dot" data-section="4"></div>
+    </div>
+
+    <section class="section fade-in">
+        <div class="glass-card">
+            <h2 class="section-title">About Me</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; text-align: center;">
+                Passionate AI & ML student at Kalvium, dedicated to pushing the boundaries of technology. 
+                With a deep fascination for artificial intelligence, machine learning, and immersive technologies, 
+                I'm constantly exploring innovative solutions that bridge the gap between human creativity and digital innovation.
+                My journey involves creating cutting-edge applications that harness the power of AI to solve real-world challenges.
+            </p>
+        </div>
+    </section>
+
+    <section class="section fade-in">
+        <div class="glass-card">
+            <h2 class="section-title">Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <div class="skill-name">Python & AI/ML</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="90"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">TensorFlow & PyTorch</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="85"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Data Science & Analytics</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="80"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Web Development</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="75"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Computer Vision</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="70"></div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">Natural Language Processing</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-width="75"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in">
+        <div class="glass-card">
+            <h2 class="section-title">Featured Projects</h2>
+            
+            <div class="project-card">
+                <div class="project-info">
+                    <h3>AI-Powered Predictive Analytics Platform</h3>
+                    <p>Developed a comprehensive machine learning platform that analyzes large datasets to predict market trends and consumer behavior using advanced neural networks and ensemble methods.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">TensorFlow</span>
+                        <span class="tech-tag">Pandas</span>
+                        <span class="tech-tag">Scikit-learn</span>
+                    </div>
+                </div>
+                <div style="height: 200px; background: linear-gradient(45deg, rgba(0,255,255,0.1), rgba(157,0,255,0.1)); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🤖</div>
+            </div>
+
+            <div class="project-card">
+                <div style="height: 200px; background: linear-gradient(45deg, rgba(0,255,157,0.1), rgba(157,0,255,0.1)); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🧠</div>
+                <div class="project-info">
+                    <h3>Neural Network Visualization Tool</h3>
+                    <p>Created an interactive web application that visualizes neural network architectures and training processes in real-time, helping students and researchers understand deep learning concepts.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">JavaScript</span>
+                        <span class="tech-tag">Three.js</span>
+                        <span class="tech-tag">D3.js</span>
+                        <span class="tech-tag">WebGL</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-info">
+                    <h3>Smart Campus IoT System</h3>
+                    <p>Designed and implemented an IoT-based smart campus solution integrating sensors, AI algorithms, and real-time data processing to optimize energy consumption and enhance campus security.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">IoT</span>
+                        <span class="tech-tag">Raspberry Pi</span>
+                        <span class="tech-tag">MQTT</span>
+                        <span class="tech-tag">Edge AI</span>
+                    </div>
+                </div>
+                <div style="height: 200px; background: linear-gradient(45deg, rgba(0,255,255,0.1), rgba(0,255,157,0.1)); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🏫</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in">
+        <div class="glass-card">
+            <h2 class="section-title">Experience & Learning</h2>
+            
+            <div class="experience-item">
+                <div class="experience-role">AI Research Intern</div>
+                <div class="experience-company">Tech Innovation Lab - Kalvium</div>
+                <p style="margin-top: 0.5rem;">Conducted research on advanced machine learning algorithms and contributed to open-source AI projects. Collaborated with senior researchers on cutting-edge AI applications.</p>
+            </div>
+
+            <div class="experience-item">
+                <div class="experience-role">Machine Learning Student</div>
+                <div class="experience-company">B.Tech AI & ML - Kalvium</div>
+                <p style="margin-top: 0.5rem;">Pursuing comprehensive education in artificial intelligence and machine learning with focus on practical applications, research methodologies, and industry best practices.</p>
+            </div>
+
+            <div class="experience-item">
+                <div class="experience-role">Tech Community Leader</div>
+                <div class="experience-company">AI/ML Student Society</div>
+                <p style="margin-top: 0.5rem;">Leading technical workshops, organizing hackathons, and mentoring fellow students in AI/ML projects and career development.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in">
+        <div class="glass-card">
+            <h2 class="section-title">Let's Connect</h2>
+            <p style="text-align: center; font-size: 1.2rem; margin-bottom: 2rem;">
+                Ready to collaborate on the next breakthrough in AI and ML?<br>
+                Let's build the future together!
+            </p>
+            <div class="contact-icons" style="justify-content: center;">
+                <div class="contact-icon" style="width: 80px; height: 80px;">📧</div>
+                <div class="contact-icon" style="width: 80px; height: 80px;">📱</div>
+                <div class="contact-icon" style="width: 80px; height: 80px;">💼</div>
+                <div class="contact-icon" style="width: 80px; height: 80px;">🌐</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Particle System
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Three.js Setup
+        function initThreeJS() {
+            const container = document.getElementById('threeContainer');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create floating geometric shapes
+            const geometry = new THREE.IcosahedronGeometry(1, 0);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+
+            const shapes = [];
+            for (let i = 0; i < 5; i++) {
+                const shape = new THREE.Mesh(geometry, material);
+                shape.position.x = (Math.random() - 0.5) * 20;
+                shape.position.y = (Math.random() - 0.5) * 10;
+                shape.position.z = (Math.random() - 0.5) * 20;
+                scene.add(shape);
+                shapes.push(shape);
+            }
+
+            camera.position.z = 5;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                shapes.forEach((shape, index) => {
+                    shape.rotation.x += 0.005;
+                    shape.rotation.y += 0.01;
+                    shape.position.y += Math.sin(Date.now() * 0.001 + index) * 0.001;
+                });
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Cursor follower
+        function initCursor() {
+            const cursor = document.getElementById('cursor');
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function updateCursor() {
+                cursorX += (mouseX - cursorX) * 0.1;
+                cursorY += (mouseY - cursorY) * 0.1;
+                cursor.style.left = cursorX + 'px';
+                cursor.style.top = cursorY + 'px';
+                requestAnimationFrame(updateCursor);
+            }
+            updateCursor();
+        }
+
+        // Scroll animations
+        function initScrollAnimations() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            const progressBars = document.querySelectorAll('.progress-fill');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        // Animate progress bars
+                        const progressFills = entry.target.querySelectorAll('.progress-fill');
+                        progressFills.forEach(fill => {
+                            const width = fill.getAttribute('data-width');
+                            setTimeout(() => {
+                                fill.style.width = width + '%';
+                            }, 500);
+                        });
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            fadeElements.forEach(el => observer.observe(el));
+        }
+
+        // Scroll indicator
+        function initScrollIndicator() {
+            const dots = document.querySelectorAll('.scroll-dot');
+            const sections = document.querySelectorAll('.section, header');
+
+            window.addEventListener('scroll', () => {
+                const scrollPos = window.scrollY + window.innerHeight / 2;
+                
+                sections.forEach((section, index) => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    
+                    if (scrollPos >= sectionTop && scrollPos <= sectionTop + sectionHeight) {
+                        dots.forEach(dot => dot.classList.remove('active'));
+                        dots[index]?.classList.add('active');
+                    }
+                });
+            });
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    const targetSection = index === 0 ? document.querySelector('header') : sections[index];
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            initThreeJS();
+            initCursor();
+            initScrollAnimations();
+            initScrollIndicator();
+        });
+
+        // Add interactive hover effects
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

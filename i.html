@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHARAN - Modern Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+        
+        /* --- Custom Cursor --- */
+        #cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* --- Enhanced Scroll Animation --- */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), scale 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        /* --- Enhanced Navigation & Magnetic Effect --- */
+        .nav-link, .magnetic-button {
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #e5e7eb;
+            transition: width 0.3s ease-in-out;
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            .nav-link:hover::after {
+                width: 100%;
+            }
+        }
+
+
+        section {
+            padding-top: 5rem; /* Header height offset */
+            padding-bottom: 5rem;
+        }
+        #home {
+            padding: 0;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* --- Parallax Background Layers --- */
+        #home-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            will-change: transform;
+        }
+        #home-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+        #home-content {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            will-change: transform, opacity;
+        }
+        
+        /* --- Enhanced Card Hover --- */
+        .project-card {
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        }
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+        }
+        
+        /* Ensure content below home section has a background */
+        main > section:not(#home) {
+            position: relative;
+            z-index: 5;
+        }
+        #about {
+            background-color: #0a0a0a;
+        }
+        #portfolio {
+            background-color: #111111;
+        }
+        #contact {
+             background-color: #0a0a0a;
+        }
+        #help {
+            background-color: #111111;
+        }
+        
+        /* --- Text Reveal Animation --- */
+        .text-reveal span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px) rotate(5deg);
+            transition: opacity 0.6s, transform 0.6s;
+            transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+    </style>
+</head>
+<body>
+    
+    <canvas id="cursor-trail"></canvas>
+
+    <!-- Main Content Wrapper -->
+    <div id="main-content">
+        <header id="header" class="fixed top-0 left-0 w-full z-50 p-4 transition-opacity duration-300 bg-black/50 backdrop-blur-sm shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex items-center justify-between">
+                    <a href="#home" class="nav-link magnetic-button text-xl font-bold tracking-tighter text-white">S.</a>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#home" class="nav-link magnetic-button text-gray-300 hover:text-white transition-colors">Home</a>
+                        <a href="#about" class="nav-link magnetic-button text-gray-300 hover:text-white transition-colors">About</a>
+                        <a href="#portfolio" class="nav-link magnetic-button text-gray-300 hover:text-white transition-colors">Portfolio</a>
+                        <a href="#contact" class="nav-link magnetic-button text-gray-300 hover:text-white transition-colors">Contact</a>
+                        <a href="#help" class="nav-link magnetic-button text-gray-300 hover:text-white transition-colors">Help</a>
+                    </div>
+                    <div class="md:hidden">
+                        <button id="mobile-menu-btn" class="text-gray-300">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+             <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden bg-black/80 backdrop-blur-sm mt-2 rounded-lg shadow-lg">
+                <a href="#home" class="nav-link block px-4 py-2 text-gray-300 hover:text-white">Home</a>
+                <a href="#about" class="nav-link block px-4 py-2 text-gray-300 hover:text-white">About</a>
+                <a href="#portfolio" class="nav-link block px-4 py-2 text-gray-300 hover:text-white">Portfolio</a>
+                <a href="#contact" class="nav-link block px-4 py-2 text-gray-300 hover:text-white">Contact</a>
+                <a href="#help" class="nav-link block px-4 py-2 text-gray-300 hover:text-white">Help</a>
+            </div>
+        </header>
+
+        <main>
+            <!-- Home Page -->
+            <section id="home">
+                <div id="home-bg"></div>
+                <div id="home-overlay"></div>
+                <div id="home-content">
+                    <div class="relative text-center text-white p-8">
+                        <h1 class="text-5xl md:text-8xl font-black tracking-tighter">
+                            <div class="text-reveal">Innovate. Create.</div>
+                            <div class="text-reveal">Inspire.</div>
+                        </h1>
+                        <p class="text-xl md:text-2xl mt-4 max-w-3xl mx-auto font-light">A passionate creator blending technology and design to build beautiful, functional, and user-centric digital experiences.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Page -->
+            <section id="about">
+                <div class="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-3xl w-full space-y-12 text-center">
+                        <div class="scroll-animate">
+                             <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-gray-100">About Me</h2>
+                             <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">Designer, Developer, and Dreamer.</p>
+                        </div>
+                        <div class="space-y-6 scroll-animate" style="transition-delay: 0.1s;">
+                            <p class="text-gray-300 leading-relaxed text-lg max-w-3xl mx-auto">I'm SHARAN, a multi-disciplinary creative with over 10 years of experience in the digital world. My journey began with a curiosity for how things work, which quickly evolved into a passion for crafting seamless user interfaces and robust backend systems.</p>
+                            <p class="text-gray-300 leading-relaxed text-lg max-w-3xl mx-auto">I believe that great design is not just about aesthetics, but about solving problems and creating intuitive, enjoyable experiences. Whether I'm coding a complex application or designing a simple logo, my goal is always to deliver work that is both beautiful and effective.</p>
+                            <p class="text-gray-300 leading-relaxed text-lg max-w-3xl mx-auto">When I'm not in front of a screen, you can find me exploring the outdoors, experimenting with new recipes, or getting lost in a good book.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Portfolio Page -->
+            <section id="portfolio">
+                 <div class="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="text-center mb-16">
+                             <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-gray-100 scroll-animate">My Work</h2>
+                             <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto scroll-animate" style="transition-delay: 0.1s;">A selection of projects that I'm proud of.</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Project 1 -->
+                            <div class="group project-card relative overflow-hidden rounded-lg shadow-lg scroll-animate bg-gray-900">
+                                <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2574&auto=format&fit=crop" alt="Corporate Rebranding Project" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-black/60 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div>
+                                        <h3 class="text-white text-2xl font-bold">Corporate Rebranding</h3>
+                                        <p class="text-gray-300 mt-1">Web Design & Development</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Project 3 -->
+                            <div class="group project-card relative overflow-hidden rounded-lg shadow-lg scroll-animate bg-gray-900" style="transition-delay: 0.1s;">
+                                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2670&auto=format&fit=crop" alt="E-commerce Platform Project" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-black/60 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div>
+                                        <h3 class="text-white text-2xl font-bold">E-commerce Platform</h3>
+                                        <p class="text-gray-300 mt-1">Full-Stack Development</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Project 4 -->
+                            <div class="group project-card relative overflow-hidden rounded-lg shadow-lg scroll-animate bg-gray-900" style="transition-delay: 0.2s;">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop" alt="SaaS Dashboard Project" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-black/60 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div>
+                                        <h3 class="text-white text-2xl font-bold">SaaS Dashboard</h3>
+                                        <p class="text-gray-300 mt-1">Frontend Development</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Project 5 -->
+                            <div class="group project-card relative overflow-hidden rounded-lg shadow-lg scroll-animate bg-gray-900" style="transition-delay: 0.3s;">
+                                <img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=2574&auto=format&fit=crop" alt="Interactive Art Installation Project" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-black/60 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div>
+                                        <h3 class="text-white text-2xl font-bold">Interactive Art Installation</h3>
+                                        <p class="text-gray-300 mt-1">Creative Coding</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- Project 6 -->
+                            <div class="group project-card relative overflow-hidden rounded-lg shadow-lg scroll-animate bg-gray-900" style="transition-delay: 0.4s;">
+                                <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2670&auto=format&fit=crop" alt="Creative Agency Website Project" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-70 group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-black/60 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div>
+                                        <h3 class="text-white text-2xl font-bold">Creative Agency Site</h3>
+                                        <p class="text-gray-300 mt-1">Web Design & Strategy</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Page -->
+            <section id="contact">
+                <div class="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-4xl w-full grid md:grid-cols-2 gap-16 items-center">
+                        <div class="space-y-8">
+                            <div class="text-left">
+                                 <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-gray-100 scroll-animate">Get In Touch</h2>
+                                 <p class="mt-4 text-lg text-gray-400 scroll-animate" style="transition-delay: 0.1s;">Have a project in mind? I'd love to hear from you.</p>
+                            </div>
+                            <div class="space-y-4 scroll-animate" style="transition-delay: 0.2s;">
+                                <div class="flex items-center space-x-4">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    <span class="text-gray-300">hello@sharan.com</span>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                    <span class="text-gray-300">+1 (555) 123-4567</span>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span class="text-gray-300">San Francisco, CA</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-900 p-8 rounded-lg shadow-xl scroll-animate" style="transition-delay: 0.1s;">
+                            <form action="#" method="POST" class="space-y-6">
+                                <div>
+                                    <label for="name" class="sr-only">Full name</label>
+                                    <input type="text" name="name" id="name" class="block w-full px-4 py-3 rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-gray-300 focus:border-gray-300 transition-all" placeholder="Full name">
+                                </div>
+                                <div>
+                                    <label for="email" class="sr-only">Email</label>
+                                    <input type="email" name="email" id="email" class="block w-full px-4 py-3 rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-gray-300 focus:border-gray-300 transition-all" placeholder="Email address">
+                                </div>
+                                <div>
+                                    <label for="message" class="sr-only">Message</label>
+                                    <textarea id="message" name="message" rows="4" class="block w-full px-4 py-3 rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-gray-300 focus:border-gray-300 transition-all" placeholder="Your message..."></textarea>
+                                </div>
+                                <div>
+                                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-white hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors">
+                                        Send Message
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Help Page -->
+            <section id="help">
+                <div class="min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-3xl mx-auto">
+                        <div class="text-center">
+                            <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-gray-100 scroll-animate">Help & FAQ</h2>
+                            <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto scroll-animate" style="transition-delay: 0.1s;">Frequently Asked Questions.</p>
+                        </div>
+                        <div class="mt-12 space-y-8">
+                            <!-- FAQ Item 1 -->
+                            <div class="scroll-animate" style="transition-delay: 0.2s;">
+                                <h3 class="text-xl font-semibold text-gray-100">What services do you offer?</h3>
+                                <p class="mt-2 text-gray-300">I offer a range of services including web design, full-stack web development, mobile app development (UI/UX and coding), and branding identity design. I can take a project from concept to launch.</p>
+                            </div>
+                            <!-- FAQ Item 2 -->
+                            <div class="scroll-animate" style="transition-delay: 0.3s;">
+                                <h3 class="text-xl font-semibold text-gray-100">What is your development process?</h3>
+                                <p class="mt-2 text-gray-300">My process is collaborative and transparent. It typically involves an initial discovery phase, followed by design mockups and prototyping, development and testing, and finally, deployment and ongoing support.</p>
+                            </div>
+                            <!-- FAQ Item 3 -->
+                            <div class="scroll-animate" style="transition-delay: 0.4s;">
+                                <h3 class="text-xl font-semibold text-gray-100">How long does a typical project take?</h3>
+                                <p class="mt-2 text-gray-300">Project timelines vary greatly depending on the scope and complexity. A simple landing page might take a week, while a full-featured web application could take several months. I provide a detailed timeline after our initial consultation.</p>
+                            </div>
+                            <!-- FAQ Item 4 -->
+                            <div class="scroll-animate" style="transition-delay: 0.5s;">
+                                <h3 class="text-xl font-semibold text-gray-100">How can I get a quote for my project?</h3>
+                                <p class="mt-2 text-gray-300">The best way to get a quote is to send me a message through the contact form with as much detail about your project as possible. I'll get back to you within 1-2 business days to discuss it further.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            
+            // --- Mobile Menu ---
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if(!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // --- Parallax and Scroll Animations ---
+            const homeSection = document.getElementById('home');
+            const homeBg = document.getElementById('home-bg');
+            const homeContent = document.getElementById('home-content');
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+
+            const handleScroll = () => {
+                const scrollY = window.scrollY;
+                const homeHeight = homeSection.offsetHeight;
+
+                if (scrollY < homeHeight) {
+                    homeBg.style.transform = `translateY(${scrollY * 0.5}px)`;
+                    homeContent.style.transform = `translateY(${scrollY * 0.2}px)`;
+                    homeContent.style.opacity = 1 - (scrollY / (homeHeight / 1.5));
+                }
+
+                animatedElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight * 0.9 && rect.bottom >= 0) {
+                        el.classList.add('visible');
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', () => {
+                window.requestAnimationFrame(handleScroll);
+            });
+
+
+            // --- Active Nav Link on Scroll ---
+            const sections = document.querySelectorAll('section');
+            const allNavLinks = document.querySelectorAll('nav .nav-link');
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                let currentSectionId = '';
+                 entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                       currentSectionId = entry.target.getAttribute('id');
+                    }
+                });
+
+                if(window.scrollY < window.innerHeight / 2) {
+                    currentSectionId = 'home';
+                }
+
+                if (currentSectionId) {
+                     allNavLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${currentSectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+
+            }, { rootMargin: "-40% 0px -60% 0px" });
+
+            sections.forEach(section => {
+                if(section.id !== 'home') {
+                    sectionObserver.observe(section);
+                }
+            });
+
+            // --- Interactive Mouse Trail ---
+            const canvas = document.getElementById('cursor-trail');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            const mouse = { x: null, y: null };
+
+            window.addEventListener('mousemove', (event) => {
+                mouse.x = event.x;
+                mouse.y = event.y;
+            });
+            
+             window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            class Particle {
+                constructor() {
+                    this.x = mouse.x;
+                    this.y = mouse.y;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                    this.color = 'rgba(255, 255, 255, 0.9)';
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.size > 0.1) this.size -= 0.03;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function handleParticles() {
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle());
+                }
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if (particles[i].size <= 0.1) {
+                        particles.splice(i, 1);
+                        i--;
+                    }
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (mouse.x !== null) {
+                    handleParticles();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+
+            // --- Magnetic Buttons ---
+            const magneticElements = document.querySelectorAll('.magnetic-button');
+            magneticElements.forEach(el => {
+                el.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    this.style.transform = `translate(${x * 0.2}px, ${y * 0.3}px)`;
+                });
+                el.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translate(0,0)';
+                });
+            });
+
+            // --- Text Reveal ---
+            const headlines = document.querySelectorAll('.text-reveal');
+            
+            headlines.forEach(headline => {
+                const text = headline.textContent;
+                headline.innerHTML = '';
+                text.split('').forEach(char => {
+                    const span = document.createElement('span');
+                    span.textContent = char === ' ' ? '\u00A0' : char;
+                    headline.appendChild(span);
+                });
+            });
+
+            function animateHeadline() {
+                headlines.forEach((headline, lineIndex) => {
+                    const spans = headline.querySelectorAll('span');
+                    spans.forEach((span, index) => {
+                        setTimeout(() => {
+                            span.style.opacity = '1';
+                            span.style.transform = 'translateY(0) rotate(0)';
+                        }, (lineIndex * 400) + index * 50); // Stagger lines and letters
+                    });
+                });
+            }
+            
+            // Initial Animation Triggers
+            animateHeadline();
+            handleScroll();
+
+        });
+    </script>
+</body>
+</html>
